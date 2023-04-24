@@ -44,7 +44,6 @@ static const unsigned char BitReverseTable256[] =
 };
 static void OnTxDone(void)
 {
-    PVD_Close();
     LOG_D("OnTxDone\r\n");
 
     Radio.SetMaxPayloadLength(MODEM_FSK, Frame_Size);
@@ -64,7 +63,6 @@ void RF_Send(char *payload,int size)
     {
         tx_convert_buf[i] = BitReverseTable256[tx_convert_buf[i]];
     }
-    PVD_Open();
     Radio.Send(tx_convert_buf, send_size);
 }
 static void OnRxDone(uint8_t *src_payload, uint16_t size, int16_t rssi, int8_t LoraSnr_FskCfo)
@@ -93,7 +91,6 @@ static void OnRxDone(uint8_t *src_payload, uint16_t size, int16_t rssi, int8_t L
 }
 static void OnTxTimeout(void)
 {
-    PVD_Close();
     LOG_W("OnTxTimeout\r\n");
 }
 static void OnRxTimeout(void)

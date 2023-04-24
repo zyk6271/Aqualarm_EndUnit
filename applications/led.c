@@ -41,6 +41,7 @@ void Led_Alarm_Disable(uint8_t count,uint8_t sec)
     rt_lptimer_stop(&alarm_timer);
     agile_led_stop(alarm_led_red);
     agile_led_stop(alarm_beep);
+    rt_pm_sleep_release(PM_LED_ID,PM_SLEEP_MODE_NONE);
 }
 void Led_Alarm_DisableBeep(void)
 {
@@ -49,9 +50,15 @@ void Led_Alarm_DisableBeep(void)
 void Led_Beep_Powerup(void)
 {
     rt_pm_module_delay_sleep(PM_LED_ID,3000);
-    agile_led_start(power_led_red);
-    agile_led_start(power_led_green);
     agile_led_start(power_beep);
+    if(Get_Factory_Self_ID())
+    {
+        agile_led_start(power_led_red);
+    }
+    else
+    {
+        agile_led_start(power_led_green);
+    }
 }
 void Led_Init(void)
 {
@@ -59,8 +66,8 @@ void Led_Init(void)
     alarm_led_red = agile_led_create(LED_R_PIN, 0, "200,200", 1);
     alarm_beep = agile_led_create(BUZZER_PIN, 1, "200,200", 1);
     agile_led_set_compelete_callback(alarm_led_red,alarm_led_callback);
-    key_press_red = agile_led_create(LED_R_PIN, 0, "200,1", 1);
-    key_press_green = agile_led_create(LED_G_PIN, 0, "200,1", 1);
+    key_press_red = agile_led_create(LED_R_PIN, 0, "0,300,200,1", 1);
+    key_press_green = agile_led_create(LED_G_PIN, 0, "0,300,200,1", 1);
     recv_beep = agile_led_create(BUZZER_PIN, 1, "200,1", 1);
     learn_success_red = agile_led_create(LED_R_PIN, 0, "200,200", 5);
     learn_success_beep = agile_led_create(BUZZER_PIN, 1, "200,200", 5);

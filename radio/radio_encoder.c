@@ -65,20 +65,39 @@ void SendPrepare(Radio_Normal_Format Send)
     radio_send_buf[31] = '\n';
 }
 
-void Reponse_Control(uint8_t command)
+void Reponse_Before(uint8_t command,uint8_t data)
 {
     switch(command)
     {
     case 2://heart
+        PVD_Open();
         Start_Heart_Timer();
         break;
     case 4://water
-        Start_Warn_Water_Timer();
+        if(data)
+        {
+            Start_Warn_Water_Timer();
+        }
+        else
+        {
+            Start_Release_Warn_Water_Timer();
+        }
         break;
-    default:break;
+    default:
+        break;
     }
 }
-
+void Reponse_After(uint8_t command,uint8_t data)
+{
+    switch(command)
+    {
+    case 2://heart
+        PVD_Close();
+        break;
+    default:
+        break;
+    }
+}
 void rf_encode_entry(void *paramaeter)
 {
     Radio_Normal_Format Send_Data;
@@ -88,10 +107,11 @@ void rf_encode_entry(void *paramaeter)
         {
             rt_pm_module_delay_sleep(PM_RF_ID, 5000);
             SendPrepare(Send_Data);
-            Reponse_Control(Send_Data.Command);
+            Reponse_Before(Send_Data.Command,Send_Data.Data);
             rt_thread_mdelay(100);
             RF_Send(radio_send_buf, rt_strlen(radio_send_buf));
-            rt_thread_mdelay(200);
+            rt_thread_mdelay(300);
+            Reponse_After(Send_Data.Command,Send_Data.Data);
         }
     }
 }
@@ -111,4 +131,16 @@ void RadioQueue_Init(void)
     rf_en_mq = rt_mq_create("rf_en_mq", sizeof(Radio_Normal_Format), 10, RT_IPC_FLAG_PRIO);
     rf_encode_t = rt_thread_create("radio_send", rf_encode_entry, RT_NULL, 1024, 9, 10);
     if (rf_encode_t)rt_thread_startup(rf_encode_t);
+}
+
+uint8_t Get_Factory_Self_ID(void)
+{
+    if(Self_Id == 20000000)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }

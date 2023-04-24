@@ -57,6 +57,7 @@ void PendSV_Handler(void);
 void SysTick_Handler(void);
 void PVD_PVM_IRQHandler(void);
 void LPTIM1_IRQHandler(void);
+void RTC_Alarm_IRQHandler(void);
 void SUBGHZ_Radio_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 

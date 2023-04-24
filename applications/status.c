@@ -31,7 +31,10 @@ WariningEvent UltraLowPowerEvent;
 WariningEvent LostPeakEvent;
 
 static uint8_t warn_water_count;
+static uint8_t release_warn_water_count;
+
 static struct rt_lptimer warn_water_timer;
+static struct rt_lptimer release_warn_water_timer;
 
 static uint8_t ValveStore;
 
@@ -49,7 +52,10 @@ uint8_t Get_Warning_Status(void)
 }
 void Heart_Refresh(void)
 {
-    Warning_Disable(Offline);
+    if(Warning_Status == Offline)
+    {
+        Warning_Disable(Offline);
+    }
 }
 void Warning_Enable(WariningEvent event)
 {
@@ -74,11 +80,23 @@ void Warning_Active_Num(uint8_t id)
     Set_ValveStore(1);
     switch(id)
     {
-    case 1:Warning_Enable(WaterAlarmActiveEvent);break;
-    case 2:Warning_Enable(OfflineEvent);break;
-    case 3:Warning_Enable(LowPowerEvent);break;
-    case 4:Warning_Enable(UltraLowPowerEvent);break;
-    case 5:Warning_Enable(LostPeakEvent);break;
+    case 1:
+        Warning_Enable(WaterAlarmActiveEvent);
+        break;
+    case 2:
+        Warning_Enable(OfflineEvent);
+        break;
+    case 3:
+        Warning_Enable(LowPowerEvent);
+        break;
+    case 4:
+        Warning_Enable(UltraLowPowerEvent);
+        break;
+    case 5:
+        Warning_Enable(LostPeakEvent);
+        break;
+    default:
+        break;
     }
 }
 void WarningEventInit(uint8_t warning_id,uint8_t priority,WariningEvent *event,void (*callback)(void*))
@@ -115,15 +133,17 @@ void Warning_Disable(enum Warning_Type type)
     }
 }
 
-void warn_water_timer_callback(void *parameter)
-{
-    LOG_D("warn_water_count is %d\r\n",warn_water_count);
-    RF_Water_Alarm_Enable();
-}
 void Period_WaterAlarm(void)
 {
     LOG_I("Period_WaterAlarm\r\n");
+    release_warn_water_count = 0;
     warn_water_count = 0;
+    RF_Water_Alarm_Enable();
+}
+
+void warn_water_timer_callback(void *parameter)
+{
+    LOG_D("warn_water_count is %d\r\n",warn_water_count);
     RF_Water_Alarm_Enable();
 }
 void Start_Warn_Water_Timer(void)
@@ -139,6 +159,26 @@ void Stop_Warn_Water_Timer(void)
     LOG_I("Stop_Warn_Water_Timer\r\n");
     rt_lptimer_stop(&warn_water_timer);
 }
+
+void release_warn_water_timer_callback(void *parameter)
+{
+    LOG_D("release_warn_water_count is %d\r\n",release_warn_water_count);
+    RF_Water_Alarm_Disable();
+}
+void Start_Release_Warn_Water_Timer(void)
+{
+    if(release_warn_water_count++ < 5)
+    {
+        LOG_I("Start_Release_Warn_Water_Timer\r\n");
+        rt_lptimer_start(&release_warn_water_timer);
+    }
+}
+void Stop_Release_Warn_Water_Timer(void)
+{
+    LOG_I("Stop_Release_Warn_Water_Timer\r\n");
+    rt_lptimer_stop(&release_warn_water_timer);
+}
+
 void WaterAlarmActiveEvent_Callback(void *parameter)
 {
     Warning_Status = WaterAlarmActive;
@@ -156,15 +196,17 @@ void LowPowerEvent_Callback(void *parameter)
 {
     Warning_Status = LowPower;
     Led_Alarm_Enable(1,30);
+    RF_HeartWithMain();
     LOG_I("LowPowerEvent_Callback\r\n");
 }
 void UltraLowPowerEvent_Callback(void *parameter)
 {
     Warning_Status = UltraLowPower;
     Led_Alarm_Enable(1,15);
+    RF_HeartWithMain();
     LOG_I("UltraLowPowerEvent_Callback\r\n");
 }
-void LostPeakEvent_Callback(void)
+void LostPeakEvent_Callback(void *parameter)
 {
     Warning_Status = LostPeak;
     Led_Alarm_Enable(2,15);
@@ -174,6 +216,7 @@ void LostPeakEvent_Callback(void)
 void WarningInit(void)
 {
     rt_lptimer_init(&warn_water_timer, "warn_water_timer", warn_water_timer_callback, RT_NULL,5000, RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
+    rt_lptimer_init(&release_warn_water_timer, "release_warn_water_timer", release_warn_water_timer_callback, RT_NULL,5000, RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
     WarningEventInit(0,0,&NowStatusEvent,RT_NULL);//本地存储器
     WarningEventInit(1,1,&LowPowerEvent,LowPowerEvent_Callback);
     WarningEventInit(2,2,&LostPeakEvent,LostPeakEvent_Callback);

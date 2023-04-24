@@ -23,7 +23,9 @@ void NormalSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
     Message_Format Rx_message = {0};
     if(rx_buffer[rx_len-1]==0x0A&&rx_buffer[rx_len-2]==0x0D)
     {
+        rt_enter_critical();
         sscanf((const char *)&rx_buffer[1],"{%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
+        rt_exit_critical();
         if(Rx_message.Target_ID != Self_Id)return;
         LOG_I("Target_ID : %d\r\n",Rx_message.Target_ID);
         switch(Rx_message.Command)
@@ -47,7 +49,14 @@ void NormalSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
             }
             break;
         case 4:
-            Stop_Warn_Water_Timer();
+            if(Rx_message.Data == 0)
+            {
+                Stop_Release_Warn_Water_Timer();
+            }
+            else
+            {
+                Stop_Warn_Water_Timer();
+            }
             break;
         case 5:
             Heart_Refresh();
