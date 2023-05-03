@@ -36,7 +36,17 @@ void Led_Alarm_Enable(uint8_t count,uint8_t sec)
     agile_led_start(alarm_led_red);
     agile_led_start(alarm_beep);
 }
-void Led_Alarm_Disable(uint8_t count,uint8_t sec)
+void Led_Alarm_Lost_Enable(void)
+{
+    uint32_t timer_tick = 15 * 1000;
+    rt_timer_control(&alarm_timer,RT_TIMER_CTRL_SET_TIME,&timer_tick);
+    rt_pm_sleep_request(PM_LED_ID,PM_SLEEP_MODE_NONE);
+    agile_led_dynamic_change_light_mode(alarm_led_red,"0,5000,200,200,200,200", 1);
+    agile_led_dynamic_change_light_mode(alarm_beep,"0,5000,200,200,200,200", 1);
+    agile_led_start(alarm_led_red);
+    agile_led_start(alarm_beep);
+}
+void Led_Alarm_Disable(void)
 {
     rt_lptimer_stop(&alarm_timer);
     agile_led_stop(alarm_led_red);

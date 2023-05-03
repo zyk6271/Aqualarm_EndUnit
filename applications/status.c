@@ -209,7 +209,7 @@ void UltraLowPowerEvent_Callback(void *parameter)
 void LostPeakEvent_Callback(void *parameter)
 {
     Warning_Status = LostPeak;
-    Led_Alarm_Enable(2,15);
+    Led_Alarm_Lost_Enable();
     RF_Peak_Alarm_Enable();
     LOG_I("LostPeakEvent_Callback\r\n");
 }
