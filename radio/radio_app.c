@@ -14,7 +14,7 @@
 #include "radio_encoder.h"
 
 #define DBG_TAG "RADIO_APP"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 CRC_HandleTypeDef hcrc;

@@ -17,13 +17,13 @@
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
-#define MCU_VER     "0.0.3"
+#define MCU_VER     "0.0.4"
 
 int main(void)
 {
     LOG_I("System Version is %s\r\n",MCU_VER);
-    RF_Init();
     StorageInit();
+    RF_Init();
     PVD_Init();
     RTC_Init();
     WarningInit();

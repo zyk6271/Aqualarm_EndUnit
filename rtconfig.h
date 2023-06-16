@@ -63,19 +63,6 @@
 #define RT_USING_USER_MAIN
 #define RT_MAIN_THREAD_STACK_SIZE 1024
 #define RT_MAIN_THREAD_PRIORITY 10
-#define RT_USING_MSH
-#define RT_USING_FINSH
-#define FINSH_USING_MSH
-#define FINSH_THREAD_NAME "tshell"
-#define FINSH_THREAD_PRIORITY 20
-#define FINSH_THREAD_STACK_SIZE 4096
-#define FINSH_USING_HISTORY
-#define FINSH_HISTORY_LINES 5
-#define FINSH_USING_SYMTAB
-#define FINSH_CMD_SIZE 80
-#define MSH_USING_BUILT_IN_COMMANDS
-#define FINSH_USING_DESCRIPTION
-#define FINSH_ARG_MAX 10
 #define RT_USING_FAL
 #define FAL_DEBUG_CONFIG
 #define FAL_DEBUG 1
@@ -228,10 +215,6 @@
 
 /* end of AI packages */
 
-/* Signal Processing and Control Algorithm Packages */
-
-/* end of Signal Processing and Control Algorithm Packages */
-
 /* miscellaneous packages */
 
 /* project laboratory */
@@ -246,6 +229,49 @@
 
 /* end of entertainment: terminal games and other interesting software packages */
 /* end of miscellaneous packages */
+
+/* Arduino libraries */
+
+
+/* Projects */
+
+/* end of Projects */
+
+/* Sensors */
+
+/* end of Sensors */
+
+/* Display */
+
+/* end of Display */
+
+/* Timing */
+
+/* end of Timing */
+
+/* Data Processing */
+
+/* end of Data Processing */
+
+/* Data Storage */
+
+/* Communication */
+
+/* end of Communication */
+
+/* Device Control */
+
+/* end of Device Control */
+
+/* Other */
+
+/* Signal IO */
+
+/* end of Signal IO */
+
+/* Uncategorized */
+
+/* end of Arduino libraries */
 /* end of RT-Thread online packages */
 
 /* samples: kernel and components samples */
