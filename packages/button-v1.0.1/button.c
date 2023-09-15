@@ -224,7 +224,7 @@ void Button_Cycle_Process(Button_t *btn)
     {
       if(btn->Button_Last_Level == btn->Button_Trigger_Level)
       {
-          rt_pm_module_delay_sleep(PM_BUTTON_ID, 100);
+          rt_pm_module_delay_sleep(PM_BUTTON_ID, 1000);
         /* Support continuous triggering */
         #ifdef CONTINUOS_TRIGGER
 
