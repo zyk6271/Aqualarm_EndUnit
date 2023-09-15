@@ -26,7 +26,7 @@ void NormalSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
         {
             return;
         }
-        LOG_D("Recv command:%d value:%d ID:%d RSSI:%d\r\n",Rx_message.Command,Rx_message.Data,Rx_message.Target_ID,Rx_message.Rssi);
+        LOG_D("Recv command:%d value:%d ID:%d RSSI:%d\r\n",Rx_message.Command,Rx_message.Data,Rx_message.From_ID,Rx_message.Rssi);
         switch(Rx_message.Command)
         {
         case 2:
