@@ -388,13 +388,12 @@ static void _pm_change_sleep_mode(struct rt_pm *pm)
     }
     else
     {
-        /* Suspend systick */
-        HAL_SuspendTick();
         /* Notify app will enter sleep mode */
         if (_pm_notify.notify)
             _pm_notify.notify(RT_PM_ENTER_SLEEP, pm->sleep_mode, _pm_notify.data);
 
         _pm_device_suspend(pm->sleep_mode);
+
         /* Tickless*/
         if (pm->timer_mask & (0x01 << pm->sleep_mode))
         {
@@ -416,8 +415,10 @@ static void _pm_change_sleep_mode(struct rt_pm *pm)
                 }
             }
         }
+
         /* enter lower power state */
         pm_sleep(pm, pm->sleep_mode);
+
         /* wake up from lower power state*/
         if (pm->timer_mask & (0x01 << pm->sleep_mode))
         {
@@ -432,18 +433,14 @@ static void _pm_change_sleep_mode(struct rt_pm *pm)
         /* resume all device */
         _pm_device_resume(pm->sleep_mode);
 
+        if (_pm_notify.notify)
+            _pm_notify.notify(RT_PM_EXIT_SLEEP_WITHOUT_ISR, pm->sleep_mode, _pm_notify.data);
+
         /* Resume interrupt */
         rt_hw_interrupt_enable(level);
 
         if (_pm_notify.notify)
-            _pm_notify.notify(RT_PM_EXIT_SLEEP, pm->sleep_mode, _pm_notify.data);
-
-        rt_kprintf("tickless compensate to %ld\n",rt_tick_get());
-
-        /* Resume systick */
-        HAL_ResumeTick();
-
-        //msh_reconfig();
+            _pm_notify.notify(RT_PM_EXIT_SLEEP_WITH_ISR, pm->sleep_mode, _pm_notify.data);
 
         if (pm->timer_mask & (0x01 << pm->sleep_mode))
         {

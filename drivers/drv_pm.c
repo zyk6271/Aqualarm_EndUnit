@@ -17,18 +17,6 @@
 #define LOG_TAG                "drv.pm"
 #include <drv_log.h>
 
-void uart_reconfig(void)
-{
-    struct serial_configure config = RT_SERIAL_CONFIG_DEFAULT;
-
-    rt_device_control(rt_console_get_device(), RT_DEVICE_CTRL_CONFIG, &config);
-}
-void msh_reconfig(void)
-{
-    struct serial_configure config = RT_SERIAL_CONFIG_DEFAULT;
-
-    rt_device_control(rt_console_get_device(), RT_DEVICE_CTRL_SET_INT, RT_NULL);
-}
 /**
  * This function will put STM32WLxx into sleep mode.
  *
@@ -39,7 +27,6 @@ static void sleep(struct rt_pm *pm, uint8_t mode)
     switch (mode)
     {
     case PM_SLEEP_MODE_NONE:
-
         break;
 
     case PM_SLEEP_MODE_IDLE:

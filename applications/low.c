@@ -16,24 +16,10 @@
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
-uint8_t Button_Wakeup_Flag;
-uint8_t Water_Wakeup_Flag;
-
-UART_HandleTypeDef huart2;
-
-void water_wakeup(void *parameter)
-{
-    Water_Wakeup_Flag = 1;
-}
-void button_wakeup(void *parameter)
-{
-    Button_Wakeup_Flag = 1;
-}
-
 void Pin_DeInit(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_10 | GPIO_PIN_11;
+    GPIO_InitStruct.Pin = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_10 | GPIO_PIN_11;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -55,10 +41,10 @@ void Pin_Init(void)
 void IRQ_Bind(void)
 {
     rt_pin_mode(KEY_OFF_PIN,PIN_MODE_INPUT);
-    rt_pin_attach_irq(KEY_OFF_PIN, PIN_IRQ_MODE_RISING_FALLING, button_wakeup, RT_NULL);
+    rt_pin_attach_irq(KEY_OFF_PIN, PIN_IRQ_MODE_RISING_FALLING, IRQ_Callback, RT_NULL);
     rt_pin_irq_enable(KEY_OFF_PIN, PIN_IRQ_ENABLE);
 
-    rt_pin_attach_irq(WATER_SIG_PIN, PIN_IRQ_MODE_FALLING, water_wakeup, RT_NULL);
+    rt_pin_attach_irq(WATER_SIG_PIN, PIN_IRQ_MODE_FALLING, IRQ_Callback, RT_NULL);
     rt_pin_irq_enable(WATER_SIG_PIN, PIN_IRQ_ENABLE);
 }
 void IRQ_Unbind(void)
@@ -83,17 +69,23 @@ void Pin_Init(void)
     rt_pin_mode(WATER_LOS_PIN,PIN_MODE_INPUT);
     rt_pin_mode(WATER_SIG_PIN,PIN_MODE_INPUT);
 }
+void IRQ_Callback(void *paramter)
+{
+    //Re-sleep after 3000ms
+    rt_pm_module_delay_sleep(PM_WAIT_ID,1000);
+}
+
 void IRQ_Bind(void)
 {
     rt_pin_mode(KEY_OFF_PIN,PIN_MODE_INPUT);
     rt_pin_mode(KEY_ON_PIN,PIN_MODE_INPUT);
-    rt_pin_attach_irq(KEY_OFF_PIN, PIN_IRQ_MODE_RISING_FALLING, button_wakeup, RT_NULL);
-    rt_pin_attach_irq(KEY_ON_PIN, PIN_IRQ_MODE_RISING_FALLING, button_wakeup, RT_NULL);
+    rt_pin_attach_irq(KEY_OFF_PIN, PIN_IRQ_MODE_RISING_FALLING, IRQ_Callback, RT_NULL);
+    rt_pin_attach_irq(KEY_ON_PIN, PIN_IRQ_MODE_RISING_FALLING, IRQ_Callback, RT_NULL);
     rt_pin_irq_enable(KEY_OFF_PIN, PIN_IRQ_ENABLE);
     rt_pin_irq_enable(KEY_ON_PIN, PIN_IRQ_ENABLE);
 
-    rt_pin_attach_irq(WATER_LOS_PIN, PIN_IRQ_MODE_RISING_FALLING, water_wakeup, RT_NULL);
-    rt_pin_attach_irq(WATER_SIG_PIN, PIN_IRQ_MODE_FALLING, water_wakeup, RT_NULL);
+    rt_pin_attach_irq(WATER_LOS_PIN, PIN_IRQ_MODE_RISING_FALLING, IRQ_Callback, RT_NULL);
+    rt_pin_attach_irq(WATER_SIG_PIN, PIN_IRQ_MODE_FALLING, IRQ_Callback, RT_NULL);
     rt_pin_irq_enable(WATER_LOS_PIN, PIN_IRQ_ENABLE);
     rt_pin_irq_enable(WATER_SIG_PIN, PIN_IRQ_ENABLE);
 }
@@ -112,67 +104,51 @@ void IRQ_Unbind(void)
 #endif
 void Debug_DeInit(void)
 {
-    huart2.Instance = USART2;
-    HAL_UART_MspDeInit(&huart2);
+    LOG_D("Goto sleep,now tick is %d\r\n",rt_tick_get());
+    rt_device_control(rt_console_get_device(), RT_DEVICE_CTRL_CLOSE, RT_NULL);
 }
 void Debug_Init(void)
 {
-    huart2.Instance = USART2;
-    HAL_UART_MspInit(&huart2);
-    uart_reconfig();
+    struct serial_configure config = RT_SERIAL_CONFIG_DEFAULT;
+    rt_device_control(rt_console_get_device(), RT_DEVICE_CTRL_CONFIG, &config);
 }
 
-void BeforeSleep(void)
-{
-    //RF
-    RF_Sleep();
-    //DEBUG UART
-    Debug_DeInit();
-    //PIN
-    Pin_DeInit();
-    //KEY
-    IRQ_Bind();
-}
-void AfterWake(void)
-{
-    //DEBUG UART
-    Debug_Init();
-    //KEY
-    IRQ_Unbind();
-    //PIN
-    Pin_Init();
-    //RF
-    RF_Wake();
-}
-void user_notify(rt_uint8_t event, rt_uint8_t mode, void *data)
+void low_power_notify(rt_uint8_t event, rt_uint8_t mode, void *data)
 {
     if (event == RT_PM_ENTER_SLEEP)
     {
-        Button_Wakeup_Flag=0;
-        Water_Wakeup_Flag=0;
-        LOG_D("Go to Sleep\r\n");
-        BeforeSleep();
+        //SYSTICK
+        rt_hw_systick_deinit();
+        //RF
+        RF_Sleep();
+        //PIN
+        Pin_DeInit();
+        //KEY
+        IRQ_Bind();
+        //DEBUG UART
+        Debug_DeInit();
     }
-    else
+    else if (event == RT_PM_EXIT_SLEEP_WITHOUT_ISR)
     {
-        AfterWake();
-        if(Button_Wakeup_Flag)
-        {
-            rt_pm_module_delay_sleep(PM_BUTTON_ID,5000);
-            Button_Wakeup_Flag = 0;
-            LOG_D("Button Wake Up Now\r\n");
-        }
-        if(Water_Wakeup_Flag)
-        {
-            rt_pm_module_delay_sleep(PM_WATER_ID,5000);
-            Water_Wakeup_Flag = 0;
-            LOG_D("Water Wake Up Now\r\n");
-        }
+        //DEBUG UART
+        Debug_Init();
+        //RF
+        RF_Wake();
+    }
+    else if (event == RT_PM_EXIT_SLEEP_WITH_ISR)
+    {
+        LOG_D("Wake up,now tick is %d\r\n",rt_tick_get());
+        //KEY
+        IRQ_Unbind();
+        //PIN
+        Pin_Init();
+        //SYSTICK
+        rt_hw_systick_init();
     }
 }
 void Low_Init(void)
 {
-    rt_pm_notify_set(user_notify, RT_NULL);
+    rt_pm_notify_set(low_power_notify, RT_NULL);
     rt_pm_request(PM_SLEEP_MODE_DEEP);
     rt_pm_release(PM_SLEEP_MODE_NONE);
 }

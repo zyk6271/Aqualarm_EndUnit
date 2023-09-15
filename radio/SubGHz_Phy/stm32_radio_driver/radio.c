@@ -689,6 +689,10 @@ static void rf_thread_entry(void* parameter)
 
 static void RadioInit( RadioEvents_t *events )
 {
+    // Initialize driver timeout timers
+    TimerInit( &TxTimeoutTimer, RadioOnTxTimeoutIrq );
+    TimerInit( &RxTimeoutTimer, RadioOnRxTimeoutIrq );
+
     rf_event = rt_event_create("wl_rf_event", RT_IPC_FLAG_PRIO);
     rf_thread = rt_thread_create("wl_rf_thread",rf_thread_entry,RT_NULL,2048,5,10);
     rt_thread_startup(rf_thread);
@@ -715,9 +719,6 @@ static void RadioInit( RadioEvents_t *events )
     /* ST_WORKAROUND_BEGIN: Sleep radio */
     RadioSleep();
     /* ST_WORKAROUND_END */
-    // Initialize driver timeout timers
-    TimerInit( &TxTimeoutTimer, RadioOnTxTimeoutIrq );
-    TimerInit( &RxTimeoutTimer, RadioOnRxTimeoutIrq );
 }
 
 static RadioState_t RadioGetStatus( void )
@@ -1402,8 +1403,6 @@ static void RadioSleep( void )
 
     params.Fields.WarmStart = 1;
     SUBGRF_SetSleep( params );
-
-    RADIO_DELAY_MS( 2 );
 }
 
 void RF_Sleep(void)

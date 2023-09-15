@@ -15,7 +15,7 @@
 #include "status.h"
 
 #define DBG_TAG "key"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 rt_thread_t button_t = RT_NULL;

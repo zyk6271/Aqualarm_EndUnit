@@ -88,7 +88,7 @@ enum pm_module_id {
     PM_CAN_ID,
     PM_ETH_ID,
     PM_SENSOR_ID,
-    PM_LCD_ID,
+    PM_WAIT_ID,
     PM_KEY_ID,
     PM_TP_ID,
     PM_MODULE_MAX_ID, /* enum must! */
@@ -185,7 +185,8 @@ struct rt_pm
 enum
 {
     RT_PM_ENTER_SLEEP = 0,
-    RT_PM_EXIT_SLEEP,
+    RT_PM_EXIT_SLEEP_WITHOUT_ISR,
+    RT_PM_EXIT_SLEEP_WITH_ISR,
 };
 
 struct rt_pm_notify

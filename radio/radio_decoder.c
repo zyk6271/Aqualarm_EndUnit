@@ -16,18 +16,17 @@
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
-extern uint32_t Self_Id;
-
 void NormalSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
 {
     Message_Format Rx_message = {0};
     if(rx_buffer[rx_len-1]==0x0A&&rx_buffer[rx_len-2]==0x0D)
     {
-        rt_enter_critical();
-        sscanf((const char *)&rx_buffer[1],"{%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
-        rt_exit_critical();
-        if(Rx_message.Target_ID != Self_Id)return;
-        LOG_I("Target_ID : %d\r\n",Rx_message.Target_ID);
+        rt_sscanf((const char *)&rx_buffer[1],"{%d,%d,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
+        if(Rx_message.Target_ID != Get_Self_ID())
+        {
+            return;
+        }
+        LOG_D("Recv command:%d value:%d ID:%d RSSI:%d\r\n",Rx_message.Command,Rx_message.Data,Rx_message.Target_ID,Rx_message.Rssi);
         switch(Rx_message.Command)
         {
         case 2:
@@ -35,7 +34,7 @@ void NormalSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
             Stop_Heart_Timer();
             break;
         case 3:
-            if(Rx_message.Target_ID == Self_Id)
+            if(Rx_message.Target_ID == Get_Self_ID())
             {
                 if(Rx_message.Data == 1)
                 {

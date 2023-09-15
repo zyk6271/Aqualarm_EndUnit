@@ -150,13 +150,13 @@ void Start_Warn_Water_Timer(void)
 {
     if(warn_water_count++ < 5)
     {
-        LOG_I("Start_Warn_Water_Timer\r\n");
+        LOG_D("Start_Warn_Water_Timer\r\n");
         rt_lptimer_start(&warn_water_timer);
     }
 }
 void Stop_Warn_Water_Timer(void)
 {
-    LOG_I("Stop_Warn_Water_Timer\r\n");
+    LOG_D("Stop_Warn_Water_Timer\r\n");
     rt_lptimer_stop(&warn_water_timer);
 }
 

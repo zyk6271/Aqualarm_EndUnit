@@ -15,10 +15,8 @@ rt_thread_t RTC_Scan = RT_NULL;
 uint8_t RTC_Counter;
 uint8_t heart_count;
 
-uint8_t rtc_irq_flag;
-
 struct rt_lptimer heart_timer;
-struct rt_lptimer power_heart_timer;
+struct rt_lptimer once_heart_timer;
 
 void heart_timer_callback(void *parameter)
 {
@@ -32,48 +30,46 @@ void heart_timer_callback(void *parameter)
         Warning_Active_Num(2);
     }
 }
+
 void Start_Heart_Timer(void)
 {
-    LOG_I("Start Watting Heart Response\r\n");
+    LOG_D("Start Watting Heart Response\r\n");
     rt_lptimer_start(&heart_timer);
 }
+
 void Stop_Heart_Timer(void)
 {
     LOG_D("Stop_Heart_Timer\r\n");
     rt_lptimer_stop(&heart_timer);
 }
-void Period_Heart(void)
+
+void heart_request_send(void)
 {
-    LOG_I("Period_Heart\r\n");
     heart_count = 0;
     RF_HeartWithMain();
 }
-void power_heart_timer_callback(void *parameter)
+
+void once_heart_timer_callback(void *parameter)
 {
-    Period_Heart();
+    heart_request_send();
 }
+
 void RTC_Timer_Entry(void *parameter)
 {
-    HW_RTC_Init();
     while(1)
     {
-//        rt_sem_take(RTC_IRQ_Sem, RT_WAITING_FOREVER);
-        if(rtc_irq_flag)
+        rt_sem_take(RTC_IRQ_Sem, RT_WAITING_FOREVER);
+        if(RTC_Counter < 23)
         {
-            rtc_irq_flag = 0;
-            if(RTC_Counter < 23)
-            {
-                RTC_Counter++;
-            }
-            else
-            {
-                RTC_Counter=0;
-                Period_Heart();
-            }
-            LOG_I("RTC alarm,time is %d\r\n",RTC_Counter);
-            rt_pm_sleep_release(PM_RTC_ID, PM_SLEEP_MODE_NONE);
+            RTC_Counter++;
         }
-        rt_thread_mdelay(5);
+        else
+        {
+            RTC_Counter=0;
+            heart_request_send();
+        }
+        LOG_I("RTC alarm,time is %d\r\n",RTC_Counter);
+        rt_pm_sleep_release(PM_RTC_ID, PM_SLEEP_MODE_NONE);
     }
 }
 void HW_RTC_Init(void)
@@ -168,8 +164,8 @@ void RTC_Alarm_IRQHandler(void)
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 {
-    rtc_irq_flag = 1;
     rt_pm_sleep_request(PM_RTC_ID, PM_SLEEP_MODE_NONE);
+    rt_sem_release(RTC_IRQ_Sem);
 
     RTC_TimeTypeDef sTime = {0};
     sTime.Hours = 0x0;
@@ -184,10 +180,12 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 }
 void RTC_Init(void)
 {
+    HW_RTC_Init();
     RTC_IRQ_Sem = rt_sem_create("RTC_IRQ", 0, RT_IPC_FLAG_FIFO);
+
     rt_lptimer_init(&heart_timer, "heart_timer", heart_timer_callback, RT_NULL,5*60*1000, RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
-    rt_lptimer_init(&power_heart_timer, "power_heart_timer", power_heart_timer_callback, RT_NULL,30*1000, RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
-    rt_lptimer_start(&power_heart_timer);
+    rt_lptimer_init(&once_heart_timer, "once_heart_timer", once_heart_timer_callback, RT_NULL,30*1000, RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
+    rt_lptimer_start(&once_heart_timer);
 
     RTC_Scan = rt_thread_create("RTC_Scan", RTC_Timer_Entry, RT_NULL, 2048, 10, 10);
     rt_thread_startup(RTC_Scan);

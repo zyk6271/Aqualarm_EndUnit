@@ -45,8 +45,9 @@ void RadioEnqueue(uint32_t Taget_Id, uint8_t Counter, uint8_t Command, uint8_t D
     Send_Buf.Command = Command;
     Send_Buf.Data = Data;
 
+    LOG_D("Send command:%d value:%d ID:%d\r\n",Command,Data,Taget_Id);
     rt_mq_send(rf_en_mq, &Send_Buf, sizeof(Radio_Normal_Format));
-    rt_pm_module_delay_sleep(PM_RF_ID, 5000);
+    rt_pm_module_delay_sleep(PM_RF_ID, 3000);
 }
 
 void SendPrepare(Radio_Normal_Format Send)
@@ -105,7 +106,7 @@ void rf_encode_entry(void *paramaeter)
     {
         if (rt_mq_recv(rf_en_mq,&Send_Data, sizeof(Radio_Normal_Format), RT_WAITING_FOREVER) == RT_EOK)
         {
-            rt_pm_module_delay_sleep(PM_RF_ID, 5000);
+            rt_pm_module_delay_sleep(PM_RF_ID, 3000);
             SendPrepare(Send_Data);
             Reponse_Before(Send_Data.Command,Send_Data.Data);
             rt_thread_mdelay(100);
@@ -130,6 +131,11 @@ void RadioQueue_Init(void)
     rf_en_mq = rt_mq_create("rf_en_mq", sizeof(Radio_Normal_Format), 10, RT_IPC_FLAG_PRIO);
     rf_encode_t = rt_thread_create("radio_send", rf_encode_entry, RT_NULL, 1024, 9, 10);
     if (rf_encode_t)rt_thread_startup(rf_encode_t);
+}
+
+uint32_t Get_Self_ID(void)
+{
+    return Self_Id;
 }
 
 uint8_t Get_Factory_Self_ID(void)
