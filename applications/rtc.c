@@ -33,13 +33,13 @@ void heart_timer_callback(void *parameter)
 
 void Start_Heart_Timer(void)
 {
-    LOG_D("Start Watting Heart Response\r\n");
+    LOG_D("Start Heart_retry timer\r\n");
     rt_lptimer_start(&heart_timer);
 }
 
 void Stop_Heart_Timer(void)
 {
-    LOG_D("Stop_Heart_Timer\r\n");
+    LOG_D("Start Heart_retry timer\r\n");
     rt_lptimer_stop(&heart_timer);
 }
 

@@ -109,10 +109,9 @@ void rf_encode_entry(void *paramaeter)
             rt_pm_module_delay_sleep(PM_RF_ID, 3000);
             SendPrepare(Send_Data);
             Reponse_Before(Send_Data.Command,Send_Data.Data);
-            rt_thread_mdelay(100);
             RF_Send(radio_send_buf, rt_strlen(radio_send_buf));
-            rt_thread_mdelay(300);
             Reponse_After(Send_Data.Command,Send_Data.Data);
+            rt_thread_mdelay(150);
         }
     }
 }

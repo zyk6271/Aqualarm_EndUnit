@@ -124,6 +124,8 @@ void Warning_Disable(enum Warning_Type type)
         case WaterAlarmActive:
             RF_Water_Alarm_Disable();
             break;
+        default:
+            break;
         }
         LOG_I("Warning is Disable\r\n");
     }
