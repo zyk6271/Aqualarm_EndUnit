@@ -217,8 +217,8 @@ void LostPeakEvent_Callback(void *parameter)
 }
 void WarningInit(void)
 {
-    rt_lptimer_init(&warn_water_timer, "warn_water_timer", warn_water_timer_callback, RT_NULL,5000, RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
-    rt_lptimer_init(&release_warn_water_timer, "release_warn_water_timer", release_warn_water_timer_callback, RT_NULL,5000, RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
+    rt_lptimer_init(&warn_water_timer, "warn_water_timer", warn_water_timer_callback, RT_NULL,15000, RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
+    rt_lptimer_init(&release_warn_water_timer, "release_warn_water_timer", release_warn_water_timer_callback, RT_NULL,15000, RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
     WarningEventInit(0,0,&NowStatusEvent,RT_NULL);//本地存储器
     WarningEventInit(1,1,&LowPowerEvent,LowPowerEvent_Callback);
     WarningEventInit(2,2,&LostPeakEvent,LostPeakEvent_Callback);

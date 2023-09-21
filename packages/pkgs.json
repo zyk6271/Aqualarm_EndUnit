@@ -1,5 +1,10 @@
 [
  {
+  "path": "/packages/system/syswatch", 
+  "ver": "latest", 
+  "name": "SYSWATCH"
+ }, 
+ {
   "path": "/packages/peripherals/button", 
   "ver": "v1.0.1", 
   "name": "BUTTON"

@@ -17,8 +17,9 @@
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
-rt_mq_t rf_en_mq;
-rt_thread_t rf_encode_t = RT_NULL;
+static rt_mq_t rf_en_mq;
+static rt_thread_t rf_encode_t = RT_NULL;
+static struct rt_completion rf_txdone_sem;
 
 uint32_t Self_Id = 0;
 #ifdef MINI
@@ -99,6 +100,12 @@ void Reponse_After(uint8_t command,uint8_t data)
         break;
     }
 }
+
+void rf_txdone_callback(void)
+{
+    rt_completion_done(&rf_txdone_sem);
+}
+
 void rf_encode_entry(void *paramaeter)
 {
     Radio_Normal_Format Send_Data;
@@ -106,12 +113,23 @@ void rf_encode_entry(void *paramaeter)
     {
         if (rt_mq_recv(rf_en_mq,&Send_Data, sizeof(Radio_Normal_Format), RT_WAITING_FOREVER) == RT_EOK)
         {
+
             rt_pm_module_delay_sleep(PM_RF_ID, 3000);
+            /*
+             * Clear RF Flag
+             */
+            rt_completion_init(&rf_txdone_sem);
+            /*
+             * Start RF Send
+             */
             SendPrepare(Send_Data);
             Reponse_Before(Send_Data.Command,Send_Data.Data);
             RF_Send(radio_send_buf, rt_strlen(radio_send_buf));
             Reponse_After(Send_Data.Command,Send_Data.Data);
-            rt_thread_mdelay(150);
+            /*
+             * Wait RF TxDone
+             */
+            rt_completion_wait(&rf_txdone_sem,200);
         }
     }
 }
