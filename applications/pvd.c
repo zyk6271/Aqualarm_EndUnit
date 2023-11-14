@@ -49,7 +49,6 @@ void PVD_PVM_IRQHandler(void)
         break;
     }
     HAL_PWR_ConfigPVD(&sConfigPVD);
-    LOG_I("Bat_Level is %d now\r\n",Bat_Level);
 }
 
 void PVD_Init(void)

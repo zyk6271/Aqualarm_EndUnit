@@ -105,8 +105,8 @@ void rt_hw_local_irq_enable(rt_base_t level);
 #define rt_hw_interrupt_enable rt_cpus_unlock
 
 #else
-//rt_base_t rt_hw_interrupt_disable(void);
-//void rt_hw_interrupt_enable(rt_base_t level);
+rt_base_t rt_hw_interrupt_disable(void);
+void rt_hw_interrupt_enable(rt_base_t level);
 #endif /*RT_USING_SMP*/
 
 /*
