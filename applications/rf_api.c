@@ -18,7 +18,6 @@
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
-
 void RF_Request_Main_Learn(void)
 {
     RadioEnqueue(Storage_Main_Read(),0,3,3);

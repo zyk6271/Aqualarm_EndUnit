@@ -81,7 +81,7 @@ enum pm_module_id {
     PM_LED_ID,
     PM_RF_ID,
     PM_RTC_ID,
-    PM_TASK_ID,
+    PM_PVD_ID,
     PM_SPI_ID,
     PM_I2C_ID,
     PM_UART_ID,

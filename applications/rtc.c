@@ -5,7 +5,7 @@
 #include "board.h"
 
 #define DBG_TAG "RTC"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 rt_sem_t RTC_IRQ_Sem;
