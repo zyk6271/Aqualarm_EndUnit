@@ -101,7 +101,7 @@ void Warning_Active_Num(uint8_t id)
 }
 void WarningEventInit(uint8_t warning_id,uint8_t priority,WariningEvent *event,void (*callback)(void*))
 {
-    rt_memset(event,0,sizeof(&event));
+    rt_memset(event,0,sizeof(WariningEvent));
     event->warning_id = warning_id;
     event->last_id = 0;
     event->priority = priority;

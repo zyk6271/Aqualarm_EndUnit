@@ -58,7 +58,6 @@ void IRQ_Unbind(void)
 #else
 void Pin_Init(void)
 {
-    RF_Switch_Init();
     rt_pin_mode(KEY_OFF_PIN,PIN_MODE_INPUT);
     rt_pin_mode(KEY_ON_PIN,PIN_MODE_INPUT);
     rt_pin_mode(WATER_LOS_PIN,PIN_MODE_INPUT);
@@ -132,6 +131,8 @@ void low_power_notify(rt_uint8_t event, rt_uint8_t mode, void *data)
     {
         //DEBUG UART
         Debug_Init();
+        //RF Switch
+        RF_Switch_Init();
         //RF
         RF_Wake();
     }
