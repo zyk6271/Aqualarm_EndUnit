@@ -1408,15 +1408,12 @@ static void RadioSleep( void )
 void RF_Sleep(void)
 {
     RadioSleep();
-    MSI_Clock_Config();
 }
-MSH_CMD_EXPORT(RF_Sleep,RF_Sleep);
 
 void RF_Wake(void)
 {
     RadioRx(0);
 }
-MSH_CMD_EXPORT(RF_Wake,RF_Wake);
 
 static void RadioStandby( void )
 {

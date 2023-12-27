@@ -46,6 +46,7 @@ static void sleep(struct rt_pm *pm, uint8_t mode)
         break;
 
     case PM_SLEEP_MODE_DEEP:
+        MSI_Clock_Config();
         /* Request of CPU to enter in Stop2 mode */
         HAL_PWREx_EnterSTOP2Mode(PWR_STOPENTRY_WFI);
         /* ReConfig System Main Clock  */
