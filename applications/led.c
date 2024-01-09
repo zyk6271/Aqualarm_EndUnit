@@ -10,7 +10,7 @@ static agile_led_t *key_press_red = RT_NULL;
 static agile_led_t *key_press_green = RT_NULL;
 static agile_led_t *recv_beep = RT_NULL;
 static agile_led_t *learn_success_beep = RT_NULL;
-static agile_led_t *learn_success_red = RT_NULL;
+static agile_led_t *learn_success_green = RT_NULL;
 static agile_led_t *power_led_red = RT_NULL;
 static agile_led_t *power_led_green = RT_NULL;
 static agile_led_t *power_beep = RT_NULL;
@@ -79,7 +79,7 @@ void Led_Init(void)
     key_press_red = agile_led_create(LED_R_PIN, 0, "0,300,200,1", 1);
     key_press_green = agile_led_create(LED_G_PIN, 0, "0,300,200,1", 1);
     recv_beep = agile_led_create(BUZZER_PIN, 1, "200,1", 1);
-    learn_success_red = agile_led_create(LED_R_PIN, 0, "200,200", 5);
+    learn_success_green = agile_led_create(LED_G_PIN, 0, "200,200", 5);
     learn_success_beep = agile_led_create(BUZZER_PIN, 1, "200,200", 5);
     power_led_red = agile_led_create(LED_R_PIN, 0, "500,1", 1);
     power_led_green = agile_led_create(LED_G_PIN, 0, "500,1", 1);
@@ -100,6 +100,6 @@ void Beep_Recv(void)
 }
 void Led_LearnSuceess(void)
 {
-    agile_led_start(learn_success_red);
+    agile_led_start(learn_success_green);
     agile_led_start(learn_success_beep);
 }
