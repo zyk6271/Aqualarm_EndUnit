@@ -184,6 +184,7 @@ void Stop_Release_Warn_Water_Timer(void)
 void WaterAlarmActiveEvent_Callback(void *parameter)
 {
     Warning_Status = WaterAlarmActive;
+    alarm_water_leak_start();
     Led_Alarm_Enable(3,5);
     Period_WaterAlarm();
     LOG_I("WaterAlarmActiveEvent_Callback\r\n");
