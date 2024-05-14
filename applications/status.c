@@ -34,7 +34,6 @@ static uint8_t warn_water_count;
 static uint8_t release_warn_water_count;
 
 static struct rt_lptimer warn_water_timer;
-static struct rt_lptimer release_warn_water_timer;
 
 static uint8_t ValveStore;
 
@@ -162,25 +161,6 @@ void Stop_Warn_Water_Timer(void)
     rt_lptimer_stop(&warn_water_timer);
 }
 
-void release_warn_water_timer_callback(void *parameter)
-{
-    LOG_D("release_warn_water_count is %d\r\n",release_warn_water_count);
-    RF_Water_Alarm_Disable();
-}
-void Start_Release_Warn_Water_Timer(void)
-{
-    if(release_warn_water_count++ < 5)
-    {
-        LOG_I("Start_Release_Warn_Water_Timer\r\n");
-        rt_lptimer_start(&release_warn_water_timer);
-    }
-}
-void Stop_Release_Warn_Water_Timer(void)
-{
-    LOG_I("Stop_Release_Warn_Water_Timer\r\n");
-    rt_lptimer_stop(&release_warn_water_timer);
-}
-
 void WaterAlarmActiveEvent_Callback(void *parameter)
 {
     Warning_Status = WaterAlarmActive;
@@ -219,7 +199,6 @@ void LostPeakEvent_Callback(void *parameter)
 void WarningInit(void)
 {
     rt_lptimer_init(&warn_water_timer, "warn_water_timer", warn_water_timer_callback, RT_NULL,15000, RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
-    rt_lptimer_init(&release_warn_water_timer, "release_warn_water_timer", release_warn_water_timer_callback, RT_NULL,15000, RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
     WarningEventInit(0,0,&NowStatusEvent,RT_NULL);//本地存储器
     WarningEventInit(1,1,&LowPowerEvent,LowPowerEvent_Callback);
     WarningEventInit(2,2,&LostPeakEvent,LostPeakEvent_Callback);

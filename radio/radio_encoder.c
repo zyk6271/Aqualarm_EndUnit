@@ -80,10 +80,6 @@ void Reponse_Before(uint8_t command,uint8_t data)
         {
             Start_Warn_Water_Timer();
         }
-        else
-        {
-            Start_Release_Warn_Water_Timer();
-        }
         break;
     default:
         break;

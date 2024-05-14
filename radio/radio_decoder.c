@@ -48,11 +48,7 @@ void NormalSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
             }
             break;
         case 4:
-            if(Rx_message.Data == 0)
-            {
-                Stop_Release_Warn_Water_Timer();
-            }
-            else
+            if(Rx_message.Data)
             {
                 Stop_Warn_Water_Timer();
             }
